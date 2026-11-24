@@ -58,7 +58,7 @@ A carga usa `dados/dados_iniciais.json` (dados fictícios; as datas das festas s
 python -m pytest
 ```
 
-Todos os testes devem passar (233 testes, cobertura de ~97% do código-fonte).
+Todos os testes devem passar (233 testes, cobertura de ~96% do código-fonte).
 Para ver a cobertura: `pip install coverage` e `coverage run --source=src/docinho -m pytest` seguido de `coverage report -m`.
 
 ## Estrutura do projeto
