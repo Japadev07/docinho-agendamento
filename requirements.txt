@@ -1,0 +1,3 @@
+# O sistema usa apenas a biblioteca padrão do Python (3.9 ou superior).
+# Dependência para executar os testes de unidade:
+pytest>=7

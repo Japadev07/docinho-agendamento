@@ -1,0 +1,63 @@
+{
+  "descricao": "Carga inicial de demonstração (dados fictícios). As datas das festas são relativas ao dia em que a carga inicial é executada.",
+  "recreadores": [
+    "Ana Lima",
+    "Bruno Costa",
+    "Camila Rocha",
+    "Diego Alves",
+    "Elisa Prado",
+    "Felipe Nunes"
+  ],
+  "contratantes": [
+    {"nome": "Maria Souza", "telefone": "(99) 98123-4567"},
+    {"nome": "João Pereira", "telefone": "(99) 99876-5432"},
+    {"nome": "Carla Mendes", "telefone": "(99) 98811-2233"}
+  ],
+  "festas": [
+    {
+      "contratante": "Maria Souza",
+      "dias_a_partir_de_hoje": 30,
+      "inicio": "14:00",
+      "termino": "17:00",
+      "endereco": "Rua das Flores, 120 — Balsas-MA",
+      "quantidade_criancas": 8,
+      "faixa_etaria": [4, 9],
+      "valor_combinado": "1000.00",
+      "atividades": ["Pintura facial", "Caça ao tesouro"],
+      "recreadores": ["Ana Lima", "Bruno Costa"],
+      "brinde": null,
+      "deslocamento": "não se aplica",
+      "pagamentos": ["500.00"]
+    },
+    {
+      "contratante": "João Pereira",
+      "dias_a_partir_de_hoje": 10,
+      "inicio": "15:00",
+      "termino": "18:00",
+      "endereco": "Avenida Principal, 45 — Balsas-MA",
+      "quantidade_criancas": 30,
+      "faixa_etaria": [5, 12],
+      "valor_combinado": "2400.00",
+      "atividades": ["Gincana", "Dança das cadeiras", "Estátua"],
+      "recreadores": ["Camila Rocha", "Diego Alves", "Elisa Prado", "Felipe Nunes", "Ana Lima", "Bruno Costa"],
+      "brinde": null,
+      "deslocamento": "não se aplica",
+      "pagamentos": ["1200.00"]
+    },
+    {
+      "contratante": "Maria Souza",
+      "dias_a_partir_de_hoje": 45,
+      "inicio": "09:00",
+      "termino": "11:00",
+      "endereco": "Rua das Flores, 120 — Balsas-MA",
+      "quantidade_criancas": 10,
+      "faixa_etaria": [3, 12],
+      "valor_combinado": "800.00",
+      "atividades": ["Contação de histórias", "Bolhas de sabão"],
+      "recreadores": ["Camila Rocha", "Diego Alves"],
+      "brinde": "não se aplica",
+      "deslocamento": "não se aplica",
+      "pagamentos": []
+    }
+  ]
+}

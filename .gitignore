@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# dados gerados em uso (a carga inicial fica em dados/dados_iniciais.json)
+dados/docinho.json
+dados/docinho.json.tmp
+dados/backups/
