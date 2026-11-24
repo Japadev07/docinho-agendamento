@@ -1,3 +1,5 @@
+"""Classe Lembrete (UML: data prevista, tipo, situação) — RF-08, RN-09."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -49,15 +51,18 @@ class Lembrete:
         return self._situacao is SituacaoLembrete.PENDENTE
 
     def deve_aparecer_em(self, dia: date) -> bool:
+        """Aviso pendente cuja data prevista já chegou (aparece até ser tratado)."""
         return self.pendente and self._data_prevista <= dia
 
     def marcar_enviado(self, data_envio: Optional[date] = None) -> None:
+        """Bruna registra que enviou a mensagem manualmente pelo WhatsApp."""
         if not self.pendente:
             raise RegraDeNegocioErro("Somente avisos pendentes podem ser marcados como enviados.")
         self._situacao = SituacaoLembrete.ENVIADO
         self._data_envio = para_data(data_envio) if data_envio else date.today()
 
     def cancelar(self) -> None:
+        """Aviso substituído (remarcação) ou sem efeito (festa cancelada)."""
         if self.pendente:
             self._situacao = SituacaoLembrete.CANCELADO
 

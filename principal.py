@@ -1,3 +1,5 @@
+"""Atalho para executar o sistema sem instalar o pacote: python principal.py"""
+
 import sys
 from pathlib import Path
 

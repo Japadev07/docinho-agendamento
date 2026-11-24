@@ -1,3 +1,5 @@
+"""Cadastro e busca de contratantes (RF-01)."""
+
 from __future__ import annotations
 
 from typing import List, Optional
@@ -27,6 +29,7 @@ class ServicoContratante:
         return sorted(self._arm.contratantes.values(), key=lambda c: sem_acentos(c.nome))
 
     def buscar(self, termo: str) -> List[Contratante]:
+        """Localiza por nome (parte do nome, sem diferenciar acentos/maiúsculas) ou por telefone (parte dos dígitos)."""
         if not isinstance(termo, str) or not termo.strip():
             raise ValidacaoErro("Informe um nome ou telefone para buscar.")
         termo_nome = sem_acentos(termo.strip())
@@ -54,6 +57,7 @@ class ServicoContratante:
         return contratante
 
     def remover(self, contratante_id: int) -> None:
+        """Só é possível excluir contratante sem festas registradas (histórico e crédito de cancelamento dependem dele)."""
         contratante = self._arm.obter_contratante(contratante_id)
         if any(f.contratante.id == contratante.id for f in self._arm.festas.values()):
             raise RegraDeNegocioErro(

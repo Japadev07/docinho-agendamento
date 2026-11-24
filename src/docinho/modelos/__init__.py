@@ -1,3 +1,5 @@
+"""Modelos do domínio (classes do Diagrama de Classes — Figura 3 da SRS)."""
+
 from .atividade import Atividade
 from .base import EntidadeBase
 from .contratante import Contratante

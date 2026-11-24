@@ -1,3 +1,5 @@
+"""Classe Recreador (UML: identificação, disponibilidade) — RF-04."""
+
 from __future__ import annotations
 
 from typing import Any, Mapping, Optional
@@ -7,6 +9,8 @@ from .base import EntidadeBase
 
 
 class Recreador(EntidadeBase):
+    """Profissional escalado para realizar as atividades."""
+
     def __init__(self, identificacao: str, disponivel: bool = True, id: Optional[int] = None):
         super().__init__(id)
         self.identificacao = identificacao
@@ -22,10 +26,12 @@ class Recreador(EntidadeBase):
 
     @property
     def disponibilidade(self) -> bool:
+        """Bruna mantém a disponibilidade atualizada (premissa da SRS)."""
         return self._disponibilidade
 
     @disponibilidade.setter
     def disponibilidade(self, valor: bool) -> None:
+        """Bruna mantém a disponibilidade atualizada (premissa da SRS)."""
         if not isinstance(valor, bool):
             from ..excecoes import ValidacaoErro
 

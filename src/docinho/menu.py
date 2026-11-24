@@ -1,3 +1,5 @@
+"""Interface de linha de comando (menu em português) para uso da gestora."""
+
 from __future__ import annotations
 
 import argparse
@@ -14,6 +16,8 @@ from .validacao import moeda, para_data
 
 
 class Interface:
+    """Menu interativo. Entrada e saída são injetáveis para facilitar os testes."""
+
     def __init__(
         self,
         sistema: Sistema,

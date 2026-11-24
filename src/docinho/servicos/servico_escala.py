@@ -1,3 +1,5 @@
+"""Escala de recreadores: conflitos e dimensionamento (RF-04, RN-05, RN-06, RN-07)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -42,6 +44,7 @@ class ServicoEscala:
         termino: time,
         ignorar_festa_id: Optional[int] = None,
     ) -> List[Conflito]:
+        """Conflitos do recreador para uma data e horário."""
         data = para_data(data)
         inicio_dt = datetime.combine(data, para_hora(inicio))
         termino_dt = datetime.combine(data, para_hora(termino))
@@ -66,11 +69,13 @@ class ServicoEscala:
         return conflitos
 
     def verificar(self, recreador: Recreador, festa: Festa) -> List[Conflito]:
+        """Conflitos do recreador para a data e horário da festa."""
         return self.verificar_janela(
             recreador, festa.data, festa.inicio, festa.termino, ignorar_festa_id=festa.id
         )
 
     def recreadores_disponiveis(self, festa: Festa) -> List[Recreador]:
+        """Recreadores ainda não escalados na festa e sem nenhum conflito para a data e o horário dela (apoio à decisão da gestora)."""
         return [
             r
             for r in self._arm.recreadores.values()
@@ -79,6 +84,7 @@ class ServicoEscala:
 
     @staticmethod
     def recomendar(festa: Festa) -> Optional[Tuple[int, int]]:
+        """(mínimo, máximo) informado no formulário, ou None se a combinação de quantidade e faixa etária não está coberta."""
         return recomendar_equipe(festa.quantidade_criancas, festa.faixa_etaria)
 
     def alertas_equipe(self, festa: Festa) -> List[str]:
@@ -101,6 +107,7 @@ class ServicoEscala:
         return []
 
     def alocar(self, festa_id: int, recreador_id: int, forcar: bool = False) -> List[Conflito]:
+        """Escala o recreador na festa."""
         festa = self._arm.obter_festa(festa_id)
         recreador = self._arm.obter_recreador(recreador_id)
         conflitos = self.verificar(recreador, festa)

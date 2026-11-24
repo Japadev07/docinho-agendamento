@@ -1,3 +1,5 @@
+"""Fachada que monta os serviços sobre um mesmo armazenamento."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -17,6 +19,8 @@ from .servicos import (
 
 
 class Sistema:
+    """Ponto único de acesso aos casos de uso do sistema Docinho."""
+
     def __init__(self, repositorio: Optional[Repositorio] = None):
         self.repositorio = repositorio if repositorio is not None else RepositorioMemoria()
         self.armazenamento = Armazenamento(self.repositorio)
@@ -31,4 +35,5 @@ class Sistema:
 
     @classmethod
     def com_arquivo(cls, caminho: Union[str, Path]) -> "Sistema":
+        """Sistema com persistência em arquivo JSON."""
         return cls(RepositorioJSON(caminho))

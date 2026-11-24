@@ -1,3 +1,5 @@
+"""Resumo do evento (RF-09): contratante, programação, equipe, valores e avisos."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

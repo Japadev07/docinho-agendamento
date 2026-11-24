@@ -1,3 +1,5 @@
+"""Carga inicial: cria contratantes, recreadores e festas de demonstração."""
+
 from __future__ import annotations
 
 import argparse

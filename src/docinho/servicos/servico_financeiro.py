@@ -1,3 +1,5 @@
+"""Acompanhamento de valores e pagamentos (RF-06, RN-02, RN-03, RN-10)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,6 +16,8 @@ _ZERO = Decimal("0.00")
 
 @dataclass(frozen=True, eq=False)
 class SituacaoFinanceira:
+    """Totais de um contratante (tela 'Financeiro' do protótipo)."""
+
     contratante: Contratante
     total_contratado: Decimal
     total_recebido: Decimal
@@ -29,6 +33,8 @@ class SituacaoFinanceira:
 
 @dataclass(frozen=True, eq=False)
 class CreditoRetido:
+    """Valor retido por cancelamento, utilizável em até 1 ano (RN-03)."""
+
     festa: Festa
     valor: Decimal
     valido_ate: date
@@ -45,6 +51,7 @@ class ServicoFinanceiro:
         self._arm = armazenamento
 
     def registrar_pagamento(self, festa_id: int, valor, data_pagamento=None) -> RegistroPagamento:
+        """Registra o pagamento. Se a gravação falhar, o pagamento é desfeito e valor, evento e saldo permanecem consistentes (RNF-03, CS-05)."""
         festa = self._arm.obter_festa(festa_id)
         with self._arm.transacao():
             registro = festa.registrar_pagamento(valor, data_pagamento)
@@ -54,6 +61,7 @@ class ServicoFinanceiro:
         return self._arm.obter_festa(festa_id).saldo_pendente
 
     def situacao_por_contratante(self) -> List[SituacaoFinanceira]:
+        """Totais por contratante, sem contar festas canceladas."""
         acumulado: Dict[int, List] = {}
         for festa in self._arm.festas.values():
             if festa.situacao is SituacaoFesta.CANCELADA:
@@ -72,6 +80,7 @@ class ServicoFinanceiro:
         return sum((s.saldo_pendente for s in self.situacao_por_contratante()), _ZERO)
 
     def creditos_retidos(self, hoje: Optional[date] = None) -> List[CreditoRetido]:
+        """Créditos de festas canceladas ainda dentro do prazo de 1 ano."""
         dia = para_data(hoje) if hoje else date.today()
         creditos = [
             CreditoRetido(f, f.credito_retido, f.credito_valido_ate)

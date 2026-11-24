@@ -1,3 +1,5 @@
+"""Classe RegistroPagamento (UML: valor recebido, saldo pendente) — RF-06."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -9,6 +11,8 @@ from ..validacao import moeda, para_data, para_decimal
 
 
 class RegistroPagamento:
+    """Pagamento recebido de uma festa, com o saldo pendente após o registro."""
+
     __slots__ = ("_valor_recebido", "_data_pagamento", "_saldo_pendente")
 
     def __init__(self, valor_recebido, data_pagamento, saldo_pendente):
@@ -32,6 +36,7 @@ class RegistroPagamento:
 
     @property
     def saldo_pendente(self) -> Decimal:
+        """Saldo da festa logo após este pagamento."""
         return self._saldo_pendente
 
     def para_dicionario(self) -> dict:

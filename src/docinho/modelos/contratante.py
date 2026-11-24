@@ -1,3 +1,5 @@
+"""Classe Contratante (UML: nome, telefone) — RF-01."""
+
 from __future__ import annotations
 
 from typing import Any, Mapping, Optional
@@ -7,6 +9,8 @@ from .base import EntidadeBase
 
 
 class Contratante(EntidadeBase):
+    """Pessoa que solicita e contrata o serviço."""
+
     def __init__(self, nome: str, telefone: str, id: Optional[int] = None):
         super().__init__(id)
         self.nome = nome
@@ -27,10 +31,12 @@ class Contratante(EntidadeBase):
 
     @property
     def telefone(self) -> str:
+        """Somente dígitos, com DDD."""
         return self._telefone
 
     @telefone.setter
     def telefone(self, valor: str) -> None:
+        """Somente dígitos, com DDD."""
         self._telefone = normalizar_telefone(valor)
 
     @property

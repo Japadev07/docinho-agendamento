@@ -1,3 +1,5 @@
+"""Dimensionamento da equipe informado no formulário (RN-06)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,6 +27,7 @@ DIMENSIONAMENTO_INFORMADO: Tuple[RegraDimensionamento, ...] = (
 
 
 def recomendar_equipe(quantidade: int, faixa: FaixaEtaria) -> Optional[Tuple[int, int]]:
+    """Retorna (mínimo, máximo) de recreadores para a combinação informada, ou ``None`` quando a combinação não está coberta pelo formulário."""
     for regra in DIMENSIONAMENTO_INFORMADO:
         if regra.aplica_a(quantidade, faixa):
             return (regra.min_recreadores, regra.max_recreadores)

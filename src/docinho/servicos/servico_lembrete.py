@@ -1,3 +1,5 @@
+"""Organização dos avisos para consulta da gestora (RF-08, RN-09)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,6 +17,8 @@ HORARIO_PREFERIDO_ENVIO = time(9, 0)
 
 @dataclass(frozen=True, eq=False)
 class Aviso:
+    """Um lembrete pendente junto da festa a que pertence."""
+
     festa: Festa
     lembrete: Lembrete
     indice: int
@@ -33,6 +37,7 @@ class ServicoLembrete:
         self._regras = tuple(regras) if regras is not None else REGRAS_PADRAO
 
     def gerar_iniciais(self, festa: Festa, data_confirmacao: date) -> List[Lembrete]:
+        """Cria os avisos de uma festa recém-confirmada (não grava)."""
         criados = []
         for regra in self._regras:
             lembrete = regra.gerar(festa.data, data_confirmacao)
@@ -42,6 +47,7 @@ class ServicoLembrete:
         return criados
 
     def refazer(self, festa: Festa, data_referencia: date) -> List[Lembrete]:
+        """Remarcação: cancela os avisos pendentes que dependem da data e recalcula a partir da data da remarcação (RN-09). Não grava."""
         regras = [r for r in self._regras if r.refazer_na_remarcacao]
         tipos = {t for r in regras for t in r.tipos}
         for lembrete in festa.lembretes:
@@ -56,6 +62,7 @@ class ServicoLembrete:
         return criados
 
     def avisos_pendentes(self, dia: Optional[date] = None) -> List[Aviso]:
+        """Avisos de festas não canceladas cuja data prevista já chegou e que ainda não foram marcados como enviados, em ordem de data."""
         dia = para_data(dia) if dia else date.today()
         avisos = []
         for festa in self._arm.festas.values():
@@ -67,6 +74,7 @@ class ServicoLembrete:
         return sorted(avisos, key=lambda a: (a.lembrete.data_prevista, a.festa.data, a.festa.id))
 
     def marcar_enviado(self, festa_id: int, indice: int, data_envio: Optional[date] = None) -> Lembrete:
+        """Bruna registra que já enviou o aviso pelo WhatsApp."""
         festa = self._arm.obter_festa(festa_id)
         lembretes = festa.lembretes
         if not 0 <= indice < len(lembretes):

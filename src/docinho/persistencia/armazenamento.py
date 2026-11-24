@@ -1,3 +1,5 @@
+"""Armazenamento: coleções em memória + persistência através de um Repositório."""
+
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -85,6 +87,7 @@ class Armazenamento:
         }
 
     def carregar(self) -> None:
+        """Lê os dados do repositório (recomeça vazio se não houver nada salvo)."""
         dados = self._repositorio.carregar()
         self._popular(dados or {})
 
@@ -93,6 +96,7 @@ class Armazenamento:
 
     @contextmanager
     def transacao(self) -> Iterator[None]:
+        """Executa alterações e grava; se a gravação falhar, desfaz tudo."""
         instantaneo = self._serializar()
         try:
             yield

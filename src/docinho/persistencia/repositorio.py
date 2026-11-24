@@ -1,3 +1,5 @@
+"""Repositórios de persistência (JSON em arquivo e em memória)."""
+
 from __future__ import annotations
 
 import copy
@@ -15,16 +17,20 @@ _FORMATO_BACKUP = "%Y%m%d_%H%M%S"
 
 
 class Repositorio(ABC):
+    """Contrato de armazenamento: lê e grava o estado completo do sistema."""
+
     @abstractmethod
     def carregar(self) -> dict:
-        pass
+        """Devolve o estado salvo ({} quando ainda não existe nada)."""
 
     @abstractmethod
     def salvar(self, dados: dict) -> None:
-        pass
+        """Grava o estado completo."""
 
 
 class RepositorioMemoria(Repositorio):
+    """Mantém os dados só em memória (testes e demonstrações)."""
+
     def __init__(self, dados: Optional[dict] = None):
         self._dados = copy.deepcopy(dados) if dados else {}
 
@@ -36,6 +42,8 @@ class RepositorioMemoria(Repositorio):
 
 
 class RepositorioJSON(Repositorio):
+    """Persistência em arquivo JSON, com backup e restauração."""
+
     def __init__(
         self,
         caminho: Union[str, Path],
@@ -87,6 +95,7 @@ class RepositorioJSON(Repositorio):
         return sorted(self.pasta_backup.glob("docinho_*.json"), reverse=True)
 
     def criar_backup(self) -> Path:
+        """Copia o arquivo atual para a pasta de backups, com data e hora no nome."""
         if not self.caminho.exists():
             raise PersistenciaErro("Não há dados salvos para copiar.")
         try:
@@ -98,6 +107,7 @@ class RepositorioJSON(Repositorio):
         return destino
 
     def backup_necessario(self, max_horas: int = 24) -> bool:
+        """True quando não há backup ou o mais recente tem mais de ``max_horas``."""
         backups = self._backups()
         if not backups:
             return True
@@ -108,6 +118,7 @@ class RepositorioJSON(Repositorio):
         return self._agora() - ultimo >= timedelta(hours=max_horas)
 
     def restaurar_ultimo_backup(self) -> Path:
+        """Restaura a cópia válida mais recente (testa se o JSON abre)."""
         for candidato in self._backups():
             try:
                 with open(candidato, "r", encoding="utf-8") as arquivo:

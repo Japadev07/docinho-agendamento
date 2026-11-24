@@ -1,3 +1,5 @@
+"""Classe Festa — centro do diagrama de classes (RF-02, RF-03, RF-05, RF-06)."""
+
 from __future__ import annotations
 
 from datetime import date, datetime, time
@@ -29,6 +31,8 @@ _ZERO = Decimal("0.00")
 
 
 class Festa(EntidadeBase):
+    """Festa contratada, com agenda, equipe, atividades, valores e avisos."""
+
     PERCENTUAL_ENTRADA = Decimal("0.5")
 
     _TRANSICOES = {
@@ -97,6 +101,7 @@ class Festa(EntidadeBase):
         return self._termino
 
     def definir_horario(self, inicio, termino) -> None:
+        """Início e término são validados em conjunto: o término vem depois."""
         hora_inicio = para_hora(inicio, "horário de início")
         hora_termino = para_hora(termino, "horário de término")
         if hora_termino <= hora_inicio:
@@ -181,6 +186,7 @@ class Festa(EntidadeBase):
 
     @property
     def confirmada(self) -> bool:
+        """True enquanto a festa está confirmada (ainda não realizada/cancelada)."""
         return self._situacao is SituacaoFesta.CONFIRMADA
 
     @property
@@ -207,6 +213,7 @@ class Festa(EntidadeBase):
 
     @property
     def entrada_prevista(self) -> Decimal:
+        """50% do valor combinado (R$ 1.000,00 -> R$ 500,00)."""
         return (self._valor_combinado * self.PERCENTUAL_ENTRADA).quantize(
             CENTAVOS, rounding=ROUND_HALF_UP
         )
@@ -217,6 +224,7 @@ class Festa(EntidadeBase):
 
     @property
     def saldo_pendente(self) -> Decimal:
+        """Valor combinado menos pagamentos recebidos (nunca diverge: CS-05)."""
         return self._valor_combinado - self.total_recebido
 
     @property
@@ -225,9 +233,11 @@ class Festa(EntidadeBase):
 
     @property
     def data_reservada(self) -> bool:
+        """RN-02: a data só fica reservada depois que a entrada é paga."""
         return self._situacao is not SituacaoFesta.CANCELADA and self.entrada_paga
 
     def registrar_pagamento(self, valor, data_pagamento=None) -> RegistroPagamento:
+        """Registra um pagamento recebido (informativo; não processa cobrança)."""
         if self._situacao is SituacaoFesta.CANCELADA:
             raise TransicaoInvalidaErro("Festa cancelada não aceita novos pagamentos.")
         valor = para_decimal(valor, "valor do pagamento")
@@ -276,6 +286,7 @@ class Festa(EntidadeBase):
         self._quitar_se_possivel()
 
     def cancelar(self, data_cancelamento=None) -> None:
+        """RN-03: o valor já pago fica retido e pode ser usado em até 1 ano."""
         self._exigir_transicao(SituacaoFesta.CANCELADA)
         dia = para_data(data_cancelamento) if data_cancelamento else date.today()
         self._situacao = SituacaoFesta.CANCELADA
@@ -286,6 +297,7 @@ class Festa(EntidadeBase):
             lembrete.cancelar()
 
     def remarcar(self, nova_data, inicio=None, termino=None) -> None:
+        """RN-04: a nova data é combinada caso a caso; o sistema só registra."""
         self._exigir_confirmada("remarcar")
         data = para_data(nova_data, "nova data")
         novo_inicio = para_hora(inicio, "horário de início") if inicio is not None else self._inicio
@@ -309,6 +321,7 @@ class Festa(EntidadeBase):
         return self._credito_valido_ate
 
     def atividades_fora_da_faixa(self) -> List[Atividade]:
+        """Atividades com indicação etária que não cobre a faixa da festa."""
         return [a for a in self._atividades if not a.adequada_para(self._faixa_etaria)]
 
     def para_dicionario(self) -> dict:

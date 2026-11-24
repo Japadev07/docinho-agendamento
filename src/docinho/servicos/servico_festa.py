@@ -1,3 +1,5 @@
+"""Registro e ciclo de vida das festas (RF-02, RF-03, RF-05, RF-07, RN-02 a RN-04, RN-08)."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -72,6 +74,7 @@ class ServicoFesta:
         data_confirmacao=None,
         forcar_escala: bool = False,
     ) -> Festa:
+        """Registra a festa já confirmada (após concordância e entrada, RN-02)."""
         hoje = para_data(data_confirmacao) if data_confirmacao else date.today()
         contratante = self._arm.obter_contratante(contratante_id) if contratante_id is not None else None
         primeira = contratante is not None and not self.festas_do_contratante(contratante.id)
@@ -136,6 +139,7 @@ class ServicoFesta:
         data_remarcacao=None,
         forcar_escala: bool = False,
     ) -> Festa:
+        """Muda a data (e opcionalmente o horário) e refaz os avisos (RN-09)."""
         festa = self._arm.obter_festa(festa_id)
         if not festa.confirmada:
             raise TransicaoInvalidaErro(
@@ -170,6 +174,7 @@ class ServicoFesta:
         return festa
 
     def cancelar(self, festa_id: int, data_cancelamento=None) -> Festa:
+        """RN-03: o valor pago fica retido e pode ser usado em até 1 ano."""
         festa = self._arm.obter_festa(festa_id)
         with self._arm.transacao():
             festa.cancelar(data_cancelamento)

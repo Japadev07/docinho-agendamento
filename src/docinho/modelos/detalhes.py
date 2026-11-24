@@ -1,3 +1,5 @@
+"""Classe DetalhesComplementares (UML: brinde, deslocamento) — RF-07."""
+
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -9,6 +11,8 @@ BRINDE_PRIMEIRA_CONTRATACAO = "Brinde de primeira contratação"
 
 
 class DetalhesComplementares:
+    """Benefícios/brindes e condições de deslocamento de um atendimento."""
+
     def __init__(self, brinde: str, deslocamento: str):
         self.brinde = brinde
         self.deslocamento = deslocamento

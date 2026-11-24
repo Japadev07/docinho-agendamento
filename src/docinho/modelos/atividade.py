@@ -1,3 +1,5 @@
+"""Brincadeira/atividade prevista para a festa (RF-05, RN-01)."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -7,6 +9,8 @@ from .faixa_etaria import FaixaEtaria
 
 
 class Atividade:
+    """Brincadeira com indicação etária opcional."""
+
     def __init__(self, nome: str, indicacao: Optional[FaixaEtaria] = None):
         self._nome = texto_obrigatorio(nome, "atividade")
         self._indicacao = FaixaEtaria.de(indicacao) if indicacao is not None else None
@@ -20,10 +24,12 @@ class Atividade:
         return self._indicacao
 
     def adequada_para(self, faixa: FaixaEtaria) -> bool:
+        """Sem indicação etária, a atividade é considerada adequada."""
         return self._indicacao is None or self._indicacao.cobre(faixa)
 
     @classmethod
     def de(cls, valor) -> "Atividade":
+        """Aceita Atividade ou apenas o nome (texto)."""
         return valor if isinstance(valor, cls) else cls(valor)
 
     def para_dicionario(self) -> dict:
