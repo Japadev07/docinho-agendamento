@@ -1,5 +1,3 @@
-"""Classe Recreador (UML: identificação, disponibilidade) — RF-04."""
-
 from __future__ import annotations
 
 from typing import Any, Mapping, Optional
@@ -9,8 +7,6 @@ from .base import EntidadeBase
 
 
 class Recreador(EntidadeBase):
-    """Profissional escalado para realizar as atividades."""
-
     def __init__(self, identificacao: str, disponivel: bool = True, id: Optional[int] = None):
         super().__init__(id)
         self.identificacao = identificacao
@@ -26,7 +22,6 @@ class Recreador(EntidadeBase):
 
     @property
     def disponibilidade(self) -> bool:
-        """Bruna mantém a disponibilidade atualizada (premissa da SRS)."""
         return self._disponibilidade
 
     @disponibilidade.setter
@@ -59,9 +54,8 @@ class Recreador(EntidadeBase):
         )
 
     def __eq__(self, outro) -> bool:
-        """Dois recreadores são o mesmo quando têm a mesma identificação."""
         if not isinstance(outro, Recreador):
             return NotImplemented
         return sem_acentos(self._identificacao) == sem_acentos(outro._identificacao)
 
-    __hash__ = None  # type: ignore[assignment]
+    __hash__ = None

@@ -1,6 +1,3 @@
-"""Testes das classes do modelo: criação, validações, encapsulamento, herança,
-polimorfismo, métodos especiais e conversão de/para dicionário."""
-
 from datetime import date, time
 from decimal import Decimal
 
@@ -57,9 +54,6 @@ def nova_festa(contratante=None, **mudancas):
     return Festa(**dados)
 
 
-# --------------------------------------------------------------------------
-# Funções de validação
-# --------------------------------------------------------------------------
 class TesteValidacao:
     @pytest.mark.parametrize(
         "entrada",
@@ -102,13 +96,10 @@ class TesteValidacao:
         assert moeda("1234.5") == "R$ 1.234,50"
 
 
-# --------------------------------------------------------------------------
-# Abstração e herança
-# --------------------------------------------------------------------------
 class TesteAbstracaoEHeranca:
     def test_entidade_base_e_abstrata(self):
         with pytest.raises(TypeError):
-            EntidadeBase()  # type: ignore[abstract]
+            EntidadeBase()
 
     @pytest.mark.parametrize("classe", [Contratante, Recreador, Festa])
     def test_entidades_herdam_da_base(self, classe):
@@ -117,14 +108,11 @@ class TesteAbstracaoEHeranca:
     def test_id_so_pode_ser_atribuido_uma_vez(self):
         contratante = Contratante("Maria", "99981234567")
         contratante.atribuir_id(1)
-        contratante.atribuir_id(1)  # repetir o mesmo valor é inofensivo
+        contratante.atribuir_id(1)
         with pytest.raises(ValueError):
             contratante.atribuir_id(2)
 
 
-# --------------------------------------------------------------------------
-# Contratante
-# --------------------------------------------------------------------------
 class TesteContratante:
     def test_criacao_normaliza_dados(self):
         c = Contratante("  Maria   Souza ", "(99) 98123-4567")
@@ -142,7 +130,7 @@ class TesteContratante:
         c = Contratante("Maria", "99981234567")
         with pytest.raises(ValidacaoErro):
             c.telefone = "123"
-        assert c.telefone == "99981234567"  # valor anterior preservado
+        assert c.telefone == "99981234567"
         c.telefone = "(99) 3333-4444"
         assert c.telefone == "9933334444"
         assert c.telefone_formatado == "(99) 3333-4444"
@@ -152,7 +140,7 @@ class TesteContratante:
         b = Contratante("Maria S.", "99981234567")
         assert str(a) == "Maria Souza — (99) 98123-4567"
         assert "Maria Souza" in repr(a) and "id=3" in repr(a)
-        assert a == b  # mesmo telefone = mesma pessoa
+        assert a == b
         assert a != Contratante("Maria Souza", "99981234568")
         assert a != "Maria Souza"
 
@@ -162,9 +150,6 @@ class TesteContratante:
         assert copia == original and copia.id == 7 and copia.nome == "Maria Souza"
 
 
-# --------------------------------------------------------------------------
-# Recreador
-# --------------------------------------------------------------------------
 class TesteRecreador:
     def test_criacao_e_disponibilidade(self):
         r = Recreador("Ana Lima")
@@ -176,7 +161,7 @@ class TesteRecreador:
         with pytest.raises(ValidacaoErro):
             Recreador("  ")
         with pytest.raises(ValidacaoErro):
-            Recreador("Ana", disponivel="sim")  # type: ignore[arg-type]
+            Recreador("Ana", disponivel="sim")
 
     def test_igualdade_ignora_acento_e_caixa(self):
         assert Recreador("João Alves") == Recreador("joao alves")
@@ -188,9 +173,6 @@ class TesteRecreador:
         assert copia == original and copia.disponibilidade is False and copia.id == 2
 
 
-# --------------------------------------------------------------------------
-# Objetos de valor e componentes
-# --------------------------------------------------------------------------
 class TesteFaixaEtaria:
     def test_validacao(self):
         with pytest.raises(ValidacaoErro):
@@ -200,7 +182,7 @@ class TesteFaixaEtaria:
         with pytest.raises(ValidacaoErro):
             FaixaEtaria(3, 30)
         with pytest.raises(ValidacaoErro):
-            FaixaEtaria("3", 5)  # type: ignore[arg-type]
+            FaixaEtaria("3", 5)
 
     def test_dunder_contains_eq_str(self):
         faixa = FaixaEtaria(5, 9)
@@ -288,7 +270,7 @@ class TesteLembrete:
         assert not l.deve_aparecer_em(HOJE)
         with pytest.raises(RegraDeNegocioErro):
             l.marcar_enviado(HOJE)
-        l.cancelar()  # já enviado: continua enviado
+        l.cancelar()
         assert l.situacao is SituacaoLembrete.ENVIADO
 
     def test_cancelar_pendente(self):
@@ -303,9 +285,6 @@ class TesteLembrete:
         assert (copia.data_prevista, copia.tipo, copia.situacao) == (l.data_prevista, l.tipo, l.situacao)
 
 
-# --------------------------------------------------------------------------
-# Festa
-# --------------------------------------------------------------------------
 class TesteFestaCriacaoEValidacao:
     def test_criacao_valida(self):
         f = nova_festa()
@@ -363,7 +342,6 @@ class TesteFestaCriacaoEValidacao:
 
 class TesteFestaValores:
     def test_entrada_e_saldo_do_exemplo_da_srs(self):
-        """RF-06 / CT-06: R$ 1.000,00 -> entrada R$ 500,00 e saldo inicial R$ 500,00."""
         f = nova_festa(valor_combinado="1000.00")
         assert f.entrada_prevista == Decimal("500.00")
         assert f.saldo_pendente == Decimal("1000.00") and not f.data_reservada
@@ -401,7 +379,6 @@ class TesteFestaValores:
             f.valor_combinado = "500"
 
     def test_data_reservada_somente_apos_entrada(self):
-        """RN-02."""
         f = nova_festa()
         f.registrar_pagamento("499.99", HOJE)
         assert not f.data_reservada
@@ -421,7 +398,7 @@ class TesteFestaSituacao:
     def test_realizada_com_saldo_zero_ja_fica_quitada(self):
         f = nova_festa()
         f.registrar_pagamento("1000", HOJE)
-        assert f.situacao is SituacaoFesta.CONFIRMADA  # ainda não aconteceu
+        assert f.situacao is SituacaoFesta.CONFIRMADA
         f.marcar_realizada(date(2026, 12, 21))
         assert f.situacao is SituacaoFesta.QUITADA
 
@@ -447,7 +424,6 @@ class TesteFestaSituacao:
                 f.cancelar(HOJE)
 
     def test_cancelamento_retem_valor_por_um_ano(self):
-        """RN-03."""
         f = nova_festa()
         f.registrar_pagamento("500", HOJE)
         f.cancelar(date(2026, 12, 1))
@@ -485,13 +461,13 @@ class TesteFestaSituacao:
         f = nova_festa()
         f.remarcar(date(2027, 1, 10), inicio="10:00", termino="12:00")
         assert f.data == date(2027, 1, 10) and (f.inicio, f.termino) == (time(10, 0), time(12, 0))
-        f.remarcar("15/01/2027")  # mantém o horário
+        f.remarcar("15/01/2027")
         assert f.data == date(2027, 1, 15) and f.inicio == time(10, 0)
 
     def test_remarcar_com_horario_invalido_nao_altera_nada(self):
         f = nova_festa()
         with pytest.raises(ValidacaoErro):
-            f.remarcar(date(2027, 1, 10), inicio="18:00")  # término 17:00 ficaria antes
+            f.remarcar(date(2027, 1, 10), inicio="18:00")
         assert f.data == date(2026, 12, 20) and f.inicio == time(14, 0)
 
 
@@ -514,7 +490,7 @@ class TesteFestaEquipe:
         with pytest.raises(RegraDeNegocioErro, match="não está escalado"):
             f.remover_recreador(Recreador("Zé"))
         with pytest.raises(ValidacaoErro):
-            f.adicionar_recreador("Ana")  # type: ignore[arg-type]
+            f.adicionar_recreador("Ana")
 
     def test_equipe_so_muda_em_festa_confirmada(self):
         f = nova_festa()
@@ -568,12 +544,10 @@ class TesteFestaConsultasEPersistencia:
 
     def test_festa_sem_contratante_gravado_nao_serializa(self):
         with pytest.raises(ValidacaoErro):
-            nova_festa(Contratante("Maria Souza", "99981234567")).para_dicionario()  # contratante sem id
+            nova_festa(Contratante("Maria Souza", "99981234567")).para_dicionario()
 
 
 class TesteDimensionamento:
-    """RN-06: dados reproduzidos como informado, sem extrapolar."""
-
     @pytest.mark.parametrize(
         "quantidade, faixa, esperado",
         [
@@ -591,9 +565,9 @@ class TesteDimensionamento:
     @pytest.mark.parametrize(
         "quantidade, faixa",
         [
-            (51, (5, 12)),  # acima de 50 crianças
-            (30, (3, 12)),  # faixa mais ampla que a informada para 50 crianças
-            (10, (0, 12)),  # fora de 3 a 12 anos
+            (51, (5, 12)),
+            (30, (3, 12)),
+            (10, (0, 12)),
         ],
     )
     def test_combinacoes_nao_cobertas_nao_sao_extrapoladas(self, quantidade, faixa):

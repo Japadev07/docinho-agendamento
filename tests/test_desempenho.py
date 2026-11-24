@@ -1,6 +1,3 @@
-"""RNF-06 (proposta do PRD): agenda e busca em até 3 segundos em 95% de
-20 consultas com 100 eventos."""
-
 import time
 from datetime import timedelta
 

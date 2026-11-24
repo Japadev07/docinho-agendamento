@@ -1,10 +1,3 @@
-"""Dimensionamento da equipe informado no formulário (RN-06).
-
-Os dados são reproduzidos exatamente como a representante informou, sem
-extrapolar para outras combinações (a própria SRS pede isso e deixa como
-pendência a conferência da linha de 10 a 12 anos).
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -32,12 +25,6 @@ DIMENSIONAMENTO_INFORMADO: Tuple[RegraDimensionamento, ...] = (
 
 
 def recomendar_equipe(quantidade: int, faixa: FaixaEtaria) -> Optional[Tuple[int, int]]:
-    """Retorna (mínimo, máximo) de recreadores para a combinação informada, ou
-    ``None`` quando a combinação não está coberta pelo formulário.
-
-    A primeira linha da tabela que atende à combinação prevalece (da menor
-    para a maior quantidade de crianças).
-    """
     for regra in DIMENSIONAMENTO_INFORMADO:
         if regra.aplica_a(quantidade, faixa):
             return (regra.min_recreadores, regra.max_recreadores)

@@ -1,23 +1,15 @@
-"""Exceções do domínio do sistema Docinho.
-
-Todas herdam de ``DocinhoErro`` para que a interface possa capturar qualquer
-falha esperada do sistema e exibir a mensagem em português (RNF-01).
-"""
-
 from __future__ import annotations
 
 
 class DocinhoErro(Exception):
-    """Erro base do sistema."""
+    pass
 
 
 class ValidacaoErro(DocinhoErro):
-    """Dado informado é inválido (formato, faixa de valores, tipo)."""
+    pass
 
 
 class CampoObrigatorioErro(ValidacaoErro):
-    """Faltam campos obrigatórios no cadastro (RF-02)."""
-
     def __init__(self, campos):
         self.campos = list(campos)
         lista = ", ".join(self.campos)
@@ -25,16 +17,14 @@ class CampoObrigatorioErro(ValidacaoErro):
 
 
 class RegraDeNegocioErro(DocinhoErro):
-    """Uma regra de negócio (RN-xx) impede a operação."""
+    pass
 
 
 class TransicaoInvalidaErro(RegraDeNegocioErro):
-    """Mudança de situação da festa não permitida."""
+    pass
 
 
 class ConflitoEscalaErro(RegraDeNegocioErro):
-    """Alocação de recreador gera conflito. A decisão final é da gestora (RF-04)."""
-
     def __init__(self, conflitos):
         self.conflitos = list(conflitos)
         detalhes = " | ".join(str(c) for c in self.conflitos)
@@ -42,8 +32,8 @@ class ConflitoEscalaErro(RegraDeNegocioErro):
 
 
 class NaoEncontradoErro(DocinhoErro):
-    """Registro não localizado."""
+    pass
 
 
 class PersistenciaErro(DocinhoErro):
-    """Falha ao gravar ou ler os dados."""
+    pass

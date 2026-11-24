@@ -1,10 +1,3 @@
-"""Registro e ciclo de vida das festas (RF-02, RF-03, RF-05, RF-07, RN-02 a RN-04, RN-08).
-
-Cada operação segue a ordem: localizar e validar tudo → montar os objetos →
-alterar e gravar dentro de uma transação. Assim, um erro de validação nunca
-deixa o sistema pela metade.
-"""
-
 from __future__ import annotations
 
 from datetime import date
@@ -46,14 +39,12 @@ class ServicoFesta:
         self._escala = escala
         self._lembretes = lembretes
 
-    # --- consulta ------------------------------------------------------------
     def obter(self, festa_id: int) -> Festa:
         return self._arm.obter_festa(festa_id)
 
     def festas_do_contratante(self, contratante_id: int) -> List[Festa]:
         return sorted(f for f in self._arm.festas.values() if f.contratante.id == contratante_id)
 
-    # --- RN-08: brinde na primeira contratação ---------------------------------
     @staticmethod
     def _aplicar_brinde_primeira_contratacao(brinde: Optional[str], primeira: bool) -> Optional[str]:
         if not primeira:
@@ -64,7 +55,6 @@ class ServicoFesta:
             return brinde
         return f"{brinde.strip()} + {BRINDE_PRIMEIRA_CONTRATACAO}"
 
-    # --- RF-02: agendar ----------------------------------------------------
     def agendar(
         self,
         contratante_id: Optional[int],
@@ -82,12 +72,6 @@ class ServicoFesta:
         data_confirmacao=None,
         forcar_escala: bool = False,
     ) -> Festa:
-        """Registra a festa já confirmada (após concordância e entrada, RN-02).
-
-        Impede o cadastro quando falta campo obrigatório (CampoObrigatorioErro),
-        gera os avisos da confirmação e, havendo conflito de escala, levanta
-        ``ConflitoEscalaErro`` até que a gestora confirme (``forcar_escala``).
-        """
         hoje = para_data(data_confirmacao) if data_confirmacao else date.today()
         contratante = self._arm.obter_contratante(contratante_id) if contratante_id is not None else None
         primeira = contratante is not None and not self.festas_do_contratante(contratante.id)
@@ -143,7 +127,6 @@ class ServicoFesta:
             self._arm.adicionar_festa(festa)
         return festa
 
-    # --- RN-04: remarcar -------------------------------------------------------
     def remarcar(
         self,
         festa_id: int,
@@ -153,7 +136,6 @@ class ServicoFesta:
         data_remarcacao=None,
         forcar_escala: bool = False,
     ) -> Festa:
-        """Muda a data (e opcionalmente o horário) e refaz os avisos (RN-09)."""
         festa = self._arm.obter_festa(festa_id)
         if not festa.confirmada:
             raise TransicaoInvalidaErro(
@@ -181,7 +163,6 @@ class ServicoFesta:
             self._lembretes.refazer(festa, hoje)
         return festa
 
-    # --- situação ------------------------------------------------------------
     def marcar_realizada(self, festa_id: int, hoje: Optional[date] = None) -> Festa:
         festa = self._arm.obter_festa(festa_id)
         with self._arm.transacao():
@@ -189,13 +170,11 @@ class ServicoFesta:
         return festa
 
     def cancelar(self, festa_id: int, data_cancelamento=None) -> Festa:
-        """RN-03: o valor pago fica retido e pode ser usado em até 1 ano."""
         festa = self._arm.obter_festa(festa_id)
         with self._arm.transacao():
             festa.cancelar(data_cancelamento)
         return festa
 
-    # --- RF-05 e RF-07: atualizações pontuais -----------------------------------
     def atualizar_criancas_e_atividades(
         self,
         festa_id: int,

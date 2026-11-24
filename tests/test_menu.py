@@ -1,5 +1,3 @@
-"""Testes da interface de linha de comando, com entradas simuladas."""
-
 import subprocess
 import sys
 from datetime import date, timedelta
@@ -18,7 +16,6 @@ def data_futura(dias=30):
 
 
 def executar(caminho, roteiro):
-    """Roda o menu com as respostas do roteiro; devolve (código, texto exibido)."""
     respostas = iter(roteiro)
     exibido = []
 
@@ -59,10 +56,10 @@ class TesteMenu:
         )
         assert codigo == 0
         assert "Contratante cadastrado: #1" in saida
-        assert saida.count("#1 — Maria Souza — (99) 98123-4567") >= 3  # cadastro + 2 buscas
+        assert saida.count("#1 — Maria Souza — (99) 98123-4567") >= 3
         assert "Nenhum contratante encontrado." in saida
         assert "Até logo!" in saida
-        assert len(Sistema.com_arquivo(caminho).contratantes.listar()) == 1  # gravado
+        assert len(Sistema.com_arquivo(caminho).contratantes.listar()) == 1
 
     def test_erros_aparecem_em_portugues_e_o_menu_continua(self, caminho):
         _, saida = executar(caminho, ["1", "Maria", "123", "1", "", "0"])
@@ -102,7 +99,7 @@ class TesteFluxoCompleto:
         codigo, saida = executar(caminho, roteiro)
         assert codigo == 0
         assert "Festa registrada: Festa #1" in saida
-        assert "Brinde de primeira contratação" in saida  # RN-08
+        assert "Brinde de primeira contratação" in saida
         assert "Entrada prevista: R$ 500,00" in saida
         assert "=== FESTA #1 — CONFIRMADA ===" in saida
         assert "Pintura facial" not in saida and "Pintura" in saida
@@ -112,17 +109,17 @@ class TesteFluxoCompleto:
         assert "O envio é manual, pelo WhatsApp" in saida
         assert "Aviso marcado como enviado." in saida
         assert "Nenhum aviso pendente para hoje." in saida
-        assert "[confirmada]" in saida  # listagem da agenda
+        assert "[confirmada]" in saida
 
     def test_alerta_de_escala_com_confirmacao_da_gestora(self, caminho):
         data = data_futura(30)
         roteiro = (
             cadastros("Ana Lima", "Bruno Costa")
             + agendar(1, data, "14:00", "17:00", "1,2")
-            + agendar(2, data, "15:00", "18:00", "1")  # Ana já está na festa 1
-            + ["n"]  # gestora não confirma
             + agendar(2, data, "15:00", "18:00", "1")
-            + ["s"]  # gestora confirma
+            + ["n"]
+            + agendar(2, data, "15:00", "18:00", "1")
+            + ["s"]
             + ["0"]
         )
         _, saida = executar(caminho, roteiro)
@@ -138,9 +135,9 @@ class TesteFluxoCompleto:
             cadastros("Ana Lima", "Bruno Costa")
             + agendar(1, data, "14:00", "17:00", "1")
             + agendar(2, data, "15:00", "18:00", "2")
-            + ["9", "2", "1", "n"]  # Ana na festa 2 -> conflito; gestora recusa
-            + ["9", "2", "1", "s"]  # confirma
-            + ["9", "1", "2"]  # Bruno na festa 1: sem conflito? está na festa 2 no mesmo horário
+            + ["9", "2", "1", "n"]
+            + ["9", "2", "1", "s"]
+            + ["9", "1", "2"]
             + ["s", "0"]
         )
         _, saida = executar(caminho, roteiro)
@@ -203,9 +200,9 @@ class TesteBackupEArquivo:
         pasta = caminho.parent / "backups"
         for arquivo in pasta.iterdir():
             arquivo.unlink()
-        executar(caminho, ["0"])  # ao abrir, não há backup recente: cria um
+        executar(caminho, ["0"])
         assert len(list(pasta.glob("docinho_*.json"))) == 1
-        executar(caminho, ["0"])  # backup recente: não cria outro
+        executar(caminho, ["0"])
         assert len(list(pasta.glob("docinho_*.json"))) == 1
 
     def test_arquivo_corrompido_retorna_erro(self, caminho):

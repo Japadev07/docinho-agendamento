@@ -1,5 +1,3 @@
-"""Funções de validação e conversão usadas pelos modelos e serviços."""
-
 from __future__ import annotations
 
 import re
@@ -13,14 +11,12 @@ CENTAVOS = Decimal("0.01")
 
 
 def texto_obrigatorio(valor, campo: str) -> str:
-    """Retorna o texto sem espaços sobrando; falha se vazio ou não for texto."""
     if not isinstance(valor, str) or not valor.strip():
         raise ValidacaoErro(f"O campo '{campo}' é obrigatório.")
     return " ".join(valor.split())
 
 
 def sem_acentos(texto: str) -> str:
-    """Remove acentos e converte para minúsculas (comparação de buscas)."""
     decomposto = unicodedata.normalize("NFKD", texto)
     return "".join(c for c in decomposto if not unicodedata.combining(c)).casefold()
 
@@ -30,8 +26,6 @@ def somente_digitos(texto: str) -> str:
 
 
 def normalizar_telefone(valor) -> str:
-    """Aceita '(99) 98123-4567', '+55 99 98123-4567' etc. e devolve só os dígitos
-    com DDD (10 ou 11 dígitos)."""
     if not isinstance(valor, str) or not valor.strip():
         raise ValidacaoErro("O campo 'telefone' é obrigatório.")
     digitos = somente_digitos(valor)
@@ -51,7 +45,6 @@ def formatar_telefone(digitos: str) -> str:
 
 
 def para_decimal(valor, campo: str = "valor") -> Decimal:
-    """Converte para Decimal com 2 casas. Aceita '1.000,50', '1000.50', int e Decimal."""
     if isinstance(valor, bool) or valor is None:
         raise ValidacaoErro(f"O campo '{campo}' é obrigatório.")
     try:
@@ -72,7 +65,6 @@ def para_decimal(valor, campo: str = "valor") -> Decimal:
 
 
 def para_data(valor, campo: str = "data") -> date:
-    """Aceita date, 'AAAA-MM-DD' ou 'DD/MM/AAAA'."""
     if isinstance(valor, datetime):
         return valor.date()
     if isinstance(valor, date):
@@ -88,7 +80,6 @@ def para_data(valor, campo: str = "data") -> date:
 
 
 def para_hora(valor, campo: str = "horário") -> time:
-    """Aceita time ou 'HH:MM'."""
     if isinstance(valor, datetime):
         return valor.time().replace(second=0, microsecond=0)
     if isinstance(valor, time):
@@ -108,7 +99,6 @@ def inteiro_positivo(valor, campo: str) -> int:
 
 
 def somar_um_ano(data: date) -> date:
-    """Mesma data no ano seguinte (29/02 vira 28/02 em ano não bissexto). RN-03."""
     try:
         return data.replace(year=data.year + 1)
     except ValueError:
@@ -116,7 +106,6 @@ def somar_um_ano(data: date) -> date:
 
 
 def moeda(valor) -> str:
-    """Formata em reais no padrão brasileiro: R$ 1.000,00."""
     numero = para_decimal(valor, "valor")
     texto = f"{numero:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return f"R$ {texto}"

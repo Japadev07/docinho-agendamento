@@ -1,5 +1,3 @@
-"""Cadastro e busca de contratantes (RF-01)."""
-
 from __future__ import annotations
 
 from typing import List, Optional
@@ -15,7 +13,7 @@ class ServicoContratante:
         self._arm = armazenamento
 
     def cadastrar(self, nome: str, telefone: str) -> Contratante:
-        novo = Contratante(nome, telefone)  # valida nome e telefone
+        novo = Contratante(nome, telefone)
         if any(c == novo for c in self._arm.contratantes.values()):
             raise RegraDeNegocioErro("Já existe um contratante cadastrado com este telefone.")
         with self._arm.transacao():
@@ -29,8 +27,6 @@ class ServicoContratante:
         return sorted(self._arm.contratantes.values(), key=lambda c: sem_acentos(c.nome))
 
     def buscar(self, termo: str) -> List[Contratante]:
-        """Localiza por nome (parte do nome, sem diferenciar acentos/maiúsculas)
-        ou por telefone (parte dos dígitos)."""
         if not isinstance(termo, str) or not termo.strip():
             raise ValidacaoErro("Informe um nome ou telefone para buscar.")
         termo_nome = sem_acentos(termo.strip())
@@ -47,7 +43,6 @@ class ServicoContratante:
         self, contratante_id: int, nome: Optional[str] = None, telefone: Optional[str] = None
     ) -> Contratante:
         contratante = self._arm.obter_contratante(contratante_id)
-        # valida tudo antes de alterar (operação atômica)
         teste = Contratante(nome if nome is not None else contratante.nome,
                             telefone if telefone is not None else contratante.telefone)
         for outro in self._arm.contratantes.values():
@@ -59,8 +54,6 @@ class ServicoContratante:
         return contratante
 
     def remover(self, contratante_id: int) -> None:
-        """Só é possível excluir contratante sem festas registradas (histórico
-        e crédito de cancelamento dependem dele)."""
         contratante = self._arm.obter_contratante(contratante_id)
         if any(f.contratante.id == contratante.id for f in self._arm.festas.values()):
             raise RegraDeNegocioErro(

@@ -1,5 +1,3 @@
-"""Serviços: regras de negócio e casos de uso."""
-
 from .servico_agenda import Agenda, ServicoAgenda
 from .servico_contratante import ServicoContratante
 from .servico_escala import INTERVALO_MINIMO, Conflito, ServicoEscala

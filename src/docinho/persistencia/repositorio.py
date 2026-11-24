@@ -1,11 +1,3 @@
-"""Repositórios de persistência (JSON em arquivo e em memória).
-
-``Repositorio`` é a abstração; ``RepositorioJSON`` grava de forma atômica
-(arquivo temporário + substituição) para que uma falha no meio da gravação não
-deixe o arquivo pela metade (RNF-03) e oferece cópia de segurança com
-restauração (RNF-04).
-"""
-
 from __future__ import annotations
 
 import copy
@@ -23,20 +15,16 @@ _FORMATO_BACKUP = "%Y%m%d_%H%M%S"
 
 
 class Repositorio(ABC):
-    """Contrato de armazenamento: lê e grava o estado completo do sistema."""
-
     @abstractmethod
     def carregar(self) -> dict:
-        """Devolve o estado salvo ({} quando ainda não existe nada)."""
+        pass
 
     @abstractmethod
     def salvar(self, dados: dict) -> None:
-        """Grava o estado completo."""
+        pass
 
 
 class RepositorioMemoria(Repositorio):
-    """Mantém os dados só em memória (testes e demonstrações)."""
-
     def __init__(self, dados: Optional[dict] = None):
         self._dados = copy.deepcopy(dados) if dados else {}
 
@@ -48,8 +36,6 @@ class RepositorioMemoria(Repositorio):
 
 
 class RepositorioJSON(Repositorio):
-    """Persistência em arquivo JSON, com backup e restauração."""
-
     def __init__(
         self,
         caminho: Union[str, Path],
@@ -60,7 +46,6 @@ class RepositorioJSON(Repositorio):
         self.pasta_backup = Path(pasta_backup) if pasta_backup else self.caminho.parent / "backups"
         self._agora = agora or datetime.now
 
-    # --- leitura e gravação -----------------------------------------------
     def carregar(self) -> dict:
         if not self.caminho.exists():
             return {}
@@ -96,14 +81,12 @@ class RepositorioJSON(Repositorio):
                 pass
             raise PersistenciaErro(f"Falha ao gravar '{destino.name}': {erro}") from erro
 
-    # --- cópia de segurança (RNF-04) --------------------------------------
     def _backups(self) -> List[Path]:
         if not self.pasta_backup.exists():
             return []
         return sorted(self.pasta_backup.glob("docinho_*.json"), reverse=True)
 
     def criar_backup(self) -> Path:
-        """Copia o arquivo atual para a pasta de backups, com data e hora no nome."""
         if not self.caminho.exists():
             raise PersistenciaErro("Não há dados salvos para copiar.")
         try:
@@ -115,7 +98,6 @@ class RepositorioJSON(Repositorio):
         return destino
 
     def backup_necessario(self, max_horas: int = 24) -> bool:
-        """True quando não há backup ou o mais recente tem mais de ``max_horas``."""
         backups = self._backups()
         if not backups:
             return True
@@ -126,7 +108,6 @@ class RepositorioJSON(Repositorio):
         return self._agora() - ultimo >= timedelta(hours=max_horas)
 
     def restaurar_ultimo_backup(self) -> Path:
-        """Restaura a cópia válida mais recente (testa se o JSON abre)."""
         for candidato in self._backups():
             try:
                 with open(candidato, "r", encoding="utf-8") as arquivo:

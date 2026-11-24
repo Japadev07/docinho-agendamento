@@ -1,8 +1,3 @@
-"""Interface de linha de comando (menu em português) para uso da gestora.
-
-Uso:  python -m docinho [--dados caminho.json]
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -19,8 +14,6 @@ from .validacao import moeda, para_data
 
 
 class Interface:
-    """Menu interativo. Entrada e saída são injetáveis para facilitar os testes."""
-
     def __init__(
         self,
         sistema: Sistema,
@@ -49,7 +42,6 @@ class Interface:
             ("Criar cópia de segurança agora", self.criar_backup),
         ]
 
-    # --- utilidades de entrada/saída ----------------------------------------
     def _dizer(self, texto: str = "") -> None:
         self._saida(texto)
 
@@ -76,7 +68,6 @@ class Interface:
     def _confirmar(self, pergunta: str) -> bool:
         return self._entrada(f"{pergunta} (s/n): ").strip().lower() in ("s", "sim")
 
-    # --- laço principal -------------------------------------------------------
     def executar(self) -> None:
         self._backup_automatico()
         self._dizer("=== Docinho Recreação Infantil — Agendamento de Festas ===")
@@ -97,7 +88,7 @@ class Interface:
                 continue
             try:
                 self._opcoes[int(escolha) - 1][1]()
-            except ConflitoEscalaErro as alerta:  # tratado nas opções; segurança extra
+            except ConflitoEscalaErro as alerta:
                 self._dizer(f"Alerta: {alerta}")
             except DocinhoErro as erro:
                 self._dizer(f"Erro: {erro}")
@@ -105,7 +96,6 @@ class Interface:
                 break
 
     def _backup_automatico(self) -> None:
-        """RNF-04: cópia de segurança a cada 24 horas (feita ao abrir o sistema)."""
         repositorio = self.sistema.repositorio
         if isinstance(repositorio, RepositorioJSON) and repositorio.caminho.exists():
             try:
@@ -114,7 +104,6 @@ class Interface:
             except DocinhoErro as erro:
                 self._dizer(f"Aviso: não foi possível criar a cópia de segurança ({erro}).")
 
-    # --- opções ------------------------------------------------------------
     def cadastrar_contratante(self) -> None:
         contratante = self.sistema.contratantes.cadastrar(self._pedir("Nome"), self._pedir("Telefone (com DDD)"))
         self._dizer(f"Contratante cadastrado: #{contratante.id} — {contratante}")

@@ -1,5 +1,3 @@
-"""Faixa etária das crianças (atributo "quantidade / faixa etária" da Festa)."""
-
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -8,8 +6,6 @@ from ..excecoes import ValidacaoErro
 
 
 class FaixaEtaria:
-    """Objeto de valor imutável: idade mínima e máxima, em anos."""
-
     __slots__ = ("_minima", "_maxima")
     IDADE_LIMITE = 17
 
@@ -34,7 +30,6 @@ class FaixaEtaria:
 
     @classmethod
     def de(cls, valor) -> "FaixaEtaria":
-        """Aceita FaixaEtaria, tupla (min, max), dicionário ou texto '5-9'."""
         if isinstance(valor, cls):
             return valor
         if isinstance(valor, (tuple, list)) and len(valor) == 2:
@@ -54,15 +49,12 @@ class FaixaEtaria:
         raise ValidacaoErro("Faixa etária inválida. Exemplo: 5-9 (de 5 a 9 anos).")
 
     def cobre(self, outra: "FaixaEtaria") -> bool:
-        """True se todas as idades de ``outra`` estão dentro desta faixa."""
         return self._minima <= outra._minima and outra._maxima <= self._maxima
 
     def para_dicionario(self) -> dict:
         return {"idade_minima": self._minima, "idade_maxima": self._maxima}
 
-    # --- métodos especiais -------------------------------------------------
     def __contains__(self, idade) -> bool:
-        """``7 in FaixaEtaria(5, 9)`` -> True."""
         return isinstance(idade, int) and self._minima <= idade <= self._maxima
 
     def __eq__(self, outro) -> bool:

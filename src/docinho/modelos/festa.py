@@ -1,14 +1,3 @@
-"""Classe Festa — centro do diagrama de classes (RF-02, RF-03, RF-05, RF-06).
-
-Relacionamentos (Figura 3 da SRS):
-
-* Contratante 1 — 0..* Festa ........ associação (a festa referencia o contratante)
-* Festa 0..* — 0..* Recreador ........ associação (equipe escalada)
-* Festa 1 — 0..* RegistroPagamento ... composição (a festa controla o ciclo de vida)
-* Festa 1 — 0..* Lembrete ............ composição
-* Festa 1 — 0..1 DetalhesComplementares composição
-"""
-
 from __future__ import annotations
 
 from datetime import date, datetime, time
@@ -40,9 +29,7 @@ _ZERO = Decimal("0.00")
 
 
 class Festa(EntidadeBase):
-    """Festa contratada, com agenda, equipe, atividades, valores e avisos."""
-
-    PERCENTUAL_ENTRADA = Decimal("0.5")  # RN-02: 50% no fechamento
+    PERCENTUAL_ENTRADA = Decimal("0.5")
 
     _TRANSICOES = {
         SituacaoFesta.CONFIRMADA: {SituacaoFesta.REALIZADA, SituacaoFesta.CANCELADA},
@@ -69,7 +56,6 @@ class Festa(EntidadeBase):
         super().__init__(id)
         if not isinstance(contratante, Contratante):
             raise ValidacaoErro("A festa precisa estar vinculada a um contratante.")
-        # componentes (composição) e associações
         self._recreadores: List[Recreador] = []
         self._pagamentos: List[RegistroPagamento] = []
         self._lembretes: List[Lembrete] = []
@@ -79,7 +65,6 @@ class Festa(EntidadeBase):
         self._credito_retido: Decimal = _ZERO
         self._credito_valido_ate: Optional[date] = None
         self._data_confirmacao = para_data(data_confirmacao) if data_confirmacao else date.today()
-        # atributos validados pelos setters
         self.data = data
         self._inicio: Optional[time] = None
         self._termino: Optional[time] = None
@@ -91,9 +76,6 @@ class Festa(EntidadeBase):
         self.atividades = atividades
         self.detalhes = detalhes
 
-    # ------------------------------------------------------------------
-    # Atributos encapsulados
-    # ------------------------------------------------------------------
     @property
     def contratante(self) -> Contratante:
         return self._contratante
@@ -115,7 +97,6 @@ class Festa(EntidadeBase):
         return self._termino
 
     def definir_horario(self, inicio, termino) -> None:
-        """Início e término são validados em conjunto: o término vem depois."""
         hora_inicio = para_hora(inicio, "horário de início")
         hora_termino = para_hora(termino, "horário de término")
         if hora_termino <= hora_inicio:
@@ -200,12 +181,8 @@ class Festa(EntidadeBase):
 
     @property
     def confirmada(self) -> bool:
-        """True enquanto a festa está confirmada (ainda não realizada/cancelada)."""
         return self._situacao is SituacaoFesta.CONFIRMADA
 
-    # ------------------------------------------------------------------
-    # Equipe (associação com Recreador)
-    # ------------------------------------------------------------------
     @property
     def recreadores(self) -> Tuple[Recreador, ...]:
         return tuple(self._recreadores)
@@ -224,16 +201,12 @@ class Festa(EntidadeBase):
             raise RegraDeNegocioErro(f"{recreador.identificacao} não está escalado(a) nesta festa.")
         self._recreadores.remove(recreador)
 
-    # ------------------------------------------------------------------
-    # Valores (composição com RegistroPagamento) — RF-06, RN-02, RN-10
-    # ------------------------------------------------------------------
     @property
     def pagamentos(self) -> Tuple[RegistroPagamento, ...]:
         return tuple(self._pagamentos)
 
     @property
     def entrada_prevista(self) -> Decimal:
-        """50% do valor combinado (R$ 1.000,00 -> R$ 500,00)."""
         return (self._valor_combinado * self.PERCENTUAL_ENTRADA).quantize(
             CENTAVOS, rounding=ROUND_HALF_UP
         )
@@ -244,7 +217,6 @@ class Festa(EntidadeBase):
 
     @property
     def saldo_pendente(self) -> Decimal:
-        """Valor combinado menos pagamentos recebidos (nunca diverge: CS-05)."""
         return self._valor_combinado - self.total_recebido
 
     @property
@@ -253,11 +225,9 @@ class Festa(EntidadeBase):
 
     @property
     def data_reservada(self) -> bool:
-        """RN-02: a data só fica reservada depois que a entrada é paga."""
         return self._situacao is not SituacaoFesta.CANCELADA and self.entrada_paga
 
     def registrar_pagamento(self, valor, data_pagamento=None) -> RegistroPagamento:
-        """Registra um pagamento recebido (informativo; não processa cobrança)."""
         if self._situacao is SituacaoFesta.CANCELADA:
             raise TransicaoInvalidaErro("Festa cancelada não aceita novos pagamentos.")
         valor = para_decimal(valor, "valor do pagamento")
@@ -277,9 +247,6 @@ class Festa(EntidadeBase):
         if self._situacao is SituacaoFesta.REALIZADA and self.saldo_pendente == _ZERO:
             self._situacao = SituacaoFesta.QUITADA
 
-    # ------------------------------------------------------------------
-    # Avisos (composição com Lembrete) — RF-08
-    # ------------------------------------------------------------------
     @property
     def lembretes(self) -> Tuple[Lembrete, ...]:
         return tuple(self._lembretes)
@@ -289,9 +256,6 @@ class Festa(EntidadeBase):
             raise ValidacaoErro("Lembrete inválido.")
         self._lembretes.append(lembrete)
 
-    # ------------------------------------------------------------------
-    # Situação da festa — RF-03, RN-03, RN-04
-    # ------------------------------------------------------------------
     def _exigir_transicao(self, destino: SituacaoFesta) -> None:
         if destino not in self._TRANSICOES[self._situacao]:
             raise TransicaoInvalidaErro(
@@ -312,7 +276,6 @@ class Festa(EntidadeBase):
         self._quitar_se_possivel()
 
     def cancelar(self, data_cancelamento=None) -> None:
-        """RN-03: o valor já pago fica retido e pode ser usado em até 1 ano."""
         self._exigir_transicao(SituacaoFesta.CANCELADA)
         dia = para_data(data_cancelamento) if data_cancelamento else date.today()
         self._situacao = SituacaoFesta.CANCELADA
@@ -323,7 +286,6 @@ class Festa(EntidadeBase):
             lembrete.cancelar()
 
     def remarcar(self, nova_data, inicio=None, termino=None) -> None:
-        """RN-04: a nova data é combinada caso a caso; o sistema só registra."""
         self._exigir_confirmada("remarcar")
         data = para_data(nova_data, "nova data")
         novo_inicio = para_hora(inicio, "horário de início") if inicio is not None else self._inicio
@@ -346,16 +308,9 @@ class Festa(EntidadeBase):
     def credito_valido_ate(self) -> Optional[date]:
         return self._credito_valido_ate
 
-    # ------------------------------------------------------------------
-    # Consultas de apoio (RF-05, RN-01)
-    # ------------------------------------------------------------------
     def atividades_fora_da_faixa(self) -> List[Atividade]:
-        """Atividades com indicação etária que não cobre a faixa da festa."""
         return [a for a in self._atividades if not a.adequada_para(self._faixa_etaria)]
 
-    # ------------------------------------------------------------------
-    # Persistência
-    # ------------------------------------------------------------------
     def para_dicionario(self) -> dict:
         if self._contratante.id is None:
             raise ValidacaoErro("O contratante da festa ainda não foi cadastrado.")
@@ -418,9 +373,6 @@ class Festa(EntidadeBase):
             festa._credito_valido_ate = para_data(dados["credito_valido_ate"])
         return festa
 
-    # ------------------------------------------------------------------
-    # Métodos especiais
-    # ------------------------------------------------------------------
     def __str__(self) -> str:
         numero = f"#{self.id}" if self.id is not None else "(nova)"
         return (
@@ -435,7 +387,6 @@ class Festa(EntidadeBase):
         )
 
     def __lt__(self, outra) -> bool:
-        """Ordena a agenda por data e horário de início."""
         if not isinstance(outra, Festa):
             return NotImplemented
         return (self._data, self._inicio) < (outra._data, outra._inicio)

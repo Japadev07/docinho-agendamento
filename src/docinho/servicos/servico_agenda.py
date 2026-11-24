@@ -1,5 +1,3 @@
-"""Agenda de festas (RF-03)."""
-
 from __future__ import annotations
 
 from datetime import date
@@ -11,13 +9,6 @@ from ..validacao import para_data
 
 
 class Agenda:
-    """Coleção de festas ordenada por data e horário.
-
-    Implementa ``__len__``, ``__iter__``, ``__getitem__`` e ``__contains__``
-    para que a agenda se comporte como uma sequência (``len(agenda)``,
-    ``for festa in agenda``, ``festa in agenda``).
-    """
-
     def __init__(self, festas: Iterable[Festa]):
         self._festas = sorted(festas)
 
@@ -71,7 +62,6 @@ class ServicoAgenda:
         return self.consultar(dia, dia)
 
     def proximas(self, hoje=None, limite: int = 5) -> Agenda:
-        """Próximas festas confirmadas a partir de ``hoje``."""
         dia = para_data(hoje) if hoje else date.today()
         agenda = self.consultar(data_inicial=dia, situacao=SituacaoFesta.CONFIRMADA)
         return Agenda(list(agenda)[:limite])

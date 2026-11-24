@@ -1,5 +1,3 @@
-"""Cadastro de recreadores e disponibilidade (RF-04)."""
-
 from __future__ import annotations
 
 from typing import List, Optional
@@ -47,8 +45,6 @@ class ServicoRecreador:
         return recreador
 
     def remover(self, recreador_id: int) -> None:
-        """Não exclui recreador que consta em alguma festa (o histórico depende
-        dele); nesse caso, basta marcá-lo como indisponível."""
         recreador = self._arm.obter_recreador(recreador_id)
         for festa in self._arm.festas.values():
             if recreador in festa.recreadores:

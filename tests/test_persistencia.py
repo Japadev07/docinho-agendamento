@@ -1,5 +1,3 @@
-"""Testes de persistência: JSON, memória, transações, backup e restauração."""
-
 import json
 import os
 from datetime import date, datetime, timedelta
@@ -20,8 +18,6 @@ def caminho(tmp_path):
 
 
 def popular(sistema):
-    """Cenário com todos os tipos de dado: contratantes, recreadores, festa,
-    pagamento, avisos (um enviado) e uma festa cancelada."""
     maria = sistema.contratantes.cadastrar("Maria Souza", "(99) 98123-4567")
     joao = sistema.contratantes.cadastrar("João Pereira", "(99) 99876-5432")
     ana = sistema.recreadores.cadastrar("Ana Lima")
@@ -50,7 +46,7 @@ class TesteRepositorioMemoria:
         assert repo.carregar() == {}
         dados = {"a": [1, 2]}
         repo.salvar(dados)
-        dados["a"].append(3)  # não deve afetar o que foi salvo
+        dados["a"].append(3)
         assert repo.carregar() == {"a": [1, 2]}
 
 
@@ -62,7 +58,7 @@ class TesteRepositorioJSON:
         repo = RepositorioJSON(caminho)
         repo.salvar({"nome": "Caça ao tesouro"})
         assert caminho.exists()
-        assert "Caça ao tesouro" in caminho.read_text(encoding="utf-8")  # acentos preservados
+        assert "Caça ao tesouro" in caminho.read_text(encoding="utf-8")
         assert repo.carregar() == {"nome": "Caça ao tesouro"}
 
     def test_arquivo_corrompido_gera_erro_claro(self, caminho):
@@ -89,7 +85,7 @@ class TesteRepositorioJSON:
             repo.salvar({"versao": "ruim"})
         monkeypatch.undo()
         assert repo.carregar() == {"versao": "boa"}
-        assert not list(caminho.parent.glob("*.tmp"))  # sem arquivo temporário sobrando
+        assert not list(caminho.parent.glob("*.tmp"))
 
     def test_dado_nao_serializavel_nao_corrompe_o_arquivo(self, caminho):
         repo = RepositorioJSON(caminho)
@@ -101,7 +97,6 @@ class TesteRepositorioJSON:
 
 class TesteArmazenamentoEPersistenciaCompleta:
     def test_dados_sobrevivem_ao_reabrir_o_sistema(self, caminho):
-        """Persistência e recuperação: tudo volta igual após fechar e abrir."""
         sistema = Sistema.com_arquivo(caminho)
         f1, f2 = popular(sistema)
 
@@ -121,7 +116,6 @@ class TesteArmazenamentoEPersistenciaCompleta:
         assert [a.nome for a in g1.atividades] == ["Pintura facial", "Caça ao tesouro"]
         assert g2.situacao is SituacaoFesta.CANCELADA and g2.credito_retido == Decimal("500.00")
         assert g2.credito_valido_ate == date(2027, 12, 1)
-        # a mesma pessoa é compartilhada entre festas (associação, não cópia)
         assert g1.recreadores[0] is reaberto.recreadores.obter(1)
         assert g2.recreadores[0] is g1.recreadores[0]
 
@@ -164,8 +158,6 @@ class TesteArmazenamentoEPersistenciaCompleta:
 
 
 class TesteTransacoes:
-    """RNF-03 / CS-05: falha ao gravar não deixa valor, evento e saldo inconsistentes."""
-
     def test_falha_ao_gravar_pagamento_desfaz_o_pagamento(self):
         repo = RepositorioFalho()
         sistema = Sistema(repo)
@@ -176,13 +168,12 @@ class TesteTransacoes:
         with pytest.raises(PersistenciaErro):
             sistema.financeiro.registrar_pagamento(f1.id, "500", HOJE)
 
-        festa = sistema.armazenamento.festas[f1.id]  # objetos recriados após o desfazer
+        festa = sistema.armazenamento.festas[f1.id]
         assert festa.saldo_pendente == saldo_antes == Decimal("500.00")
         assert len(festa.pagamentos) == 1 and festa.situacao is SituacaoFesta.CONFIRMADA
-        # o que está gravado também continua consistente
         assert Sistema(repo).festas.obter(f1.id).saldo_pendente == Decimal("500.00")
 
-        repo.falhar = False  # o sistema volta ao normal
+        repo.falhar = False
         sistema.financeiro.registrar_pagamento(f1.id, "500", HOJE)
         assert sistema.festas.obter(f1.id).saldo_pendente == Decimal("0.00")
 
@@ -197,7 +188,7 @@ class TesteTransacoes:
             sistema.festas.agendar(**dados_festa)
         assert len(sistema.agenda.consultar()) == 0
         repo.falhar = False
-        assert sistema.festas.agendar(**dados_festa).id == 1  # identificador não foi "gasto"
+        assert sistema.festas.agendar(**dados_festa).id == 1
 
     def test_falha_ao_cadastrar_contratante(self):
         repo = RepositorioFalho()
@@ -216,7 +207,7 @@ class TesteTransacoes:
 
         with pytest.raises(ValidacaoErro):
             sistema.financeiro.registrar_pagamento(1, "9999", HOJE)
-        assert sistema.festas.obter(1) is festa  # nada foi recriado
+        assert sistema.festas.obter(1) is festa
 
 
 class TesteBackup:
@@ -236,7 +227,7 @@ class TesteBackup:
         relogio = {"agora": datetime(2026, 11, 24, 10, 0, 0)}
         repo = RepositorioJSON(caminho, agora=lambda: relogio["agora"])
         repo.salvar({"x": 1})
-        assert repo.backup_necessario(24)  # ainda não há backup
+        assert repo.backup_necessario(24)
         repo.criar_backup()
         relogio["agora"] += timedelta(hours=23, minutes=59)
         assert not repo.backup_necessario(24)
@@ -244,23 +235,22 @@ class TesteBackup:
         assert repo.backup_necessario(24)
 
     def test_restaurar_ultima_copia_valida(self, caminho):
-        """RNF-04: restauração da última cópia válida."""
         relogio = {"agora": datetime(2026, 11, 24, 10, 0, 0)}
         repo = RepositorioJSON(caminho, agora=lambda: relogio["agora"])
         sistema = Sistema(repo)
         sistema.contratantes.cadastrar("Maria Souza", "(99) 98123-4567")
-        repo.criar_backup()  # cópia 1: 1 contratante
+        repo.criar_backup()
         relogio["agora"] += timedelta(days=1)
         sistema.contratantes.cadastrar("João Pereira", "(99) 99876-5432")
-        repo.criar_backup()  # cópia 2: 2 contratantes
+        repo.criar_backup()
         relogio["agora"] += timedelta(days=1)
-        repo.criar_backup()  # cópia 3 (será corrompida)
+        repo.criar_backup()
         copias = sorted(repo.pasta_backup.glob("docinho_*.json"))
         copias[-1].write_text("lixo", encoding="utf-8")
         caminho.write_text("arquivo atual danificado", encoding="utf-8")
 
         restaurada = repo.restaurar_ultimo_backup()
-        assert restaurada == copias[-2]  # ignorou a cópia inválida
+        assert restaurada == copias[-2]
         assert len(Sistema.com_arquivo(caminho).contratantes.listar()) == 2
 
     def test_restaurar_sem_copia_valida(self, caminho):

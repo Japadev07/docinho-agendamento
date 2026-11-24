@@ -1,14 +1,3 @@
-"""Carga inicial: cria contratantes, recreadores e festas de demonstração.
-
-Uso (na pasta do projeto):
-    python scripts/carga_inicial.py                 # cria dados/docinho.json se não existir
-    python scripts/carga_inicial.py --forcar        # recria o arquivo do zero
-    python scripts/carga_inicial.py --dados outro.json
-
-O script usa os mesmos serviços do sistema, então todas as regras de negócio
-(avisos, escala, brinde da primeira contratação) valem também para a carga.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -20,8 +9,8 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 
-from docinho import Sistema  # noqa: E402
-from docinho.excecoes import DocinhoErro  # noqa: E402
+from docinho import Sistema
+from docinho.excecoes import DocinhoErro
 
 
 def carregar(sistema: Sistema, definicao: dict, hoje: date) -> None:

@@ -1,10 +1,3 @@
-"""Armazenamento: coleções em memória + persistência através de um Repositório.
-
-Concentra o carregamento, a gravação e as transações. As operações que gravam
-usam ``transacao()``: se a gravação falhar, o estado em memória volta ao que
-era antes, mantendo valor, evento e saldo consistentes (RNF-03).
-"""
-
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -26,7 +19,6 @@ class Armazenamento:
         self.festas: Dict[int, Festa] = {}
         self.carregar()
 
-    # --- identificadores ---------------------------------------------------
     def _proximo_id(self, tipo: str) -> int:
         self._contadores[tipo] += 1
         return self._contadores[tipo]
@@ -46,7 +38,6 @@ class Armazenamento:
         self.festas[festa.id] = festa
         return festa
 
-    # --- consultas ---------------------------------------------------------
     def obter_contratante(self, id: int) -> Contratante:
         return self._obter(self.contratantes, id, "Contratante")
 
@@ -63,7 +54,6 @@ class Armazenamento:
         except KeyError:
             raise NaoEncontradoErro(f"{rotulo} {id} não encontrado(a).") from None
 
-    # --- persistência ------------------------------------------------------
     def _serializar(self) -> dict:
         return {
             "versao": VERSAO_DADOS,
@@ -95,7 +85,6 @@ class Armazenamento:
         }
 
     def carregar(self) -> None:
-        """Lê os dados do repositório (recomeça vazio se não houver nada salvo)."""
         dados = self._repositorio.carregar()
         self._popular(dados or {})
 
@@ -104,15 +93,6 @@ class Armazenamento:
 
     @contextmanager
     def transacao(self) -> Iterator[None]:
-        """Executa alterações e grava; se a gravação falhar, desfaz tudo.
-
-        As operações do domínio são atômicas (validam antes de alterar), então
-        um erro de regra de negócio não deixa nada pela metade e não exige
-        desfazer. Já uma falha de gravação (ou erro inesperado) restaura o
-        estado anterior, mantendo valor, evento e saldo consistentes (RNF-03).
-        Após restaurar, os objetos são recriados: consulte-os de novo pelo
-        identificador.
-        """
         instantaneo = self._serializar()
         try:
             yield

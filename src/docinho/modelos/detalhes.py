@@ -1,5 +1,3 @@
-"""Classe DetalhesComplementares (UML: brinde, deslocamento) — RF-07."""
-
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -11,14 +9,6 @@ BRINDE_PRIMEIRA_CONTRATACAO = "Brinde de primeira contratação"
 
 
 class DetalhesComplementares:
-    """Benefícios/brindes e condições de deslocamento de um atendimento.
-
-    Os dois campos são obrigatórios no formulário. Quando não há brinde ou
-    deslocamento, a gestora informa "não se aplica" (ponto a confirmar com a
-    representante, registrado na SRS 1.1). O registro é manual: não há
-    cálculo automático de rota.
-    """
-
     def __init__(self, brinde: str, deslocamento: str):
         self.brinde = brinde
         self.deslocamento = deslocamento
